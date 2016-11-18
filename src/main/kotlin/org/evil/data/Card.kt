@@ -6,7 +6,11 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
-open class Card() {
+open class Card() : Comparable<Card> {
+
+    override fun compareTo(other: Card): Int {
+        return id.compareTo(other.id)
+    }
 
     constructor(word: String, meaning:String) : this(){
         this.word = word

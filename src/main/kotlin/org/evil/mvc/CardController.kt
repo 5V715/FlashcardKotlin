@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.ModelAndView
+import java.util.*
 
 @RestController
 open class CardController(@Autowired repo : CardRepository) {
@@ -15,14 +17,30 @@ open class CardController(@Autowired repo : CardRepository) {
 
     val repository : CardRepository = repo
 
-    @RequestMapping(path = arrayOf("/listAll"), method = arrayOf(RequestMethod.GET))
-    fun listAllCards(): List<Card> {
-        return repository.findAll().toList()
-    }
-
     @RequestMapping(path = arrayOf("/save"), method = arrayOf(RequestMethod.POST))
     fun addCard(@RequestBody card :Card) : Unit {
         logger.info { "saving card : ${card.toString()} id : ${repository.save(card).id}"}
+    }
+
+    @RequestMapping(path = arrayOf("/shuffle"), method = arrayOf(RequestMethod.GET))
+    fun shuffle() : List<Card> {
+        return shuffle(repository.findAll().toMutableList())
+    }
+
+    @RequestMapping(path = arrayOf("/play"), method = arrayOf(RequestMethod.GET))
+    fun play() : ModelAndView {
+        return ModelAndView("views/play",mapOf("cards" to shuffle()))
+    }
+
+    private fun <T:Comparable<T>>shuffle(items:MutableList<T>):List<T>{
+        val rg : Random = Random()
+        for (i in 0..items.size - 1) {
+            val randomPosition = rg.nextInt(items.size)
+            val tmp : T = items[i]
+            items[i] = items[randomPosition]
+            items[randomPosition] = tmp
+        }
+        return items
     }
 
 }
